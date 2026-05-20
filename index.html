@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kicau Mania | Premium Bird Shop</title>
 
+    <!-- ==========================================
+        PENGATURAN FAVICON 
+    ============================================-->
+    <link rel="icon" type="image/png" href="img/favicon.png">
+    <!-- Catatan: Ganti 'img/favicon.png' dengan path file ikon Anda -->
+    <!-- Jika menggunakan format .ico, ganti type menjadi "image/x-icon" -->
+    <!-- ========================================== -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -104,9 +112,7 @@
             background-repeat: no-repeat;
         }
 
-        /* ==========================================
-           PENGATURAN HERO BACKGROUND VIDEO 
-        ============================================*/
+        /* HERO BACKGROUND VIDEO */
         .hero {
             position: relative;
             height: 100vh;
@@ -115,7 +121,7 @@
             justify-content: center;
             text-align: center;
             padding-top: 80px;
-            overflow: hidden; /* Agar video tidak keluar dari area hero */
+            overflow: hidden;
         }
 
         .hero-video {
@@ -127,7 +133,7 @@
             width: auto;
             height: auto;
             transform: translate(-50%, -50%);
-            object-fit: cover; /* Menjaga proporsi video tetap rapi */
+            object-fit: cover;
             z-index: 0;
         }
 
@@ -137,11 +143,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(9, 13, 22, 0.65); /* Lapisan gelap agar teks mudah dibaca */
+            background: rgba(9, 13, 22, 0.65);
             z-index: 1;
         }
-
-        /* ========================================== */
 
         .hero-content h1 {
             font-size: 64px;
@@ -206,7 +210,7 @@
             transform: translateY(-2px);
         }
 
-        /* SECTION LAINNYA */
+        /* SECTIONS BACKGROUNDS */
         .birds-section {
             background: linear-gradient(rgba(15, 23, 42, 0.5), rgba(15, 23, 42, 0.5)), url('img/koleksi-bg.jpg');
             background-size: cover;
@@ -217,10 +221,6 @@
             background: linear-gradient(rgba(9, 13, 22, 0.85), rgba(9, 13, 22, 0.85)), url('img/tentang-bg.jpg');
             background-size: cover;
             background-position: center;
-        }
-
-        .testimonials {
-            background-color: #0b111e;
         }
 
         .contact-section {
@@ -248,7 +248,7 @@
             margin: auto;
         }
 
-        /* CARDS / JUALAN PRODUCTS */
+        /* CARDS / PRODUCTS GRID */
         .bird-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -565,7 +565,6 @@
     </header>
 
     <section class="hero" id="home">
-        
         <video autoplay muted loop playsinline class="hero-video">
             <source src="video/birds.mp4" type="video/mp4">
             Browser Anda tidak mendukung tag video.
@@ -593,6 +592,7 @@
             </div>
 
             <div class="bird-grid">
+                <!-- Murai Batu -->
                 <div class="bird-card">
                     <div class="card-img-wrapper">
                         <span class="badge">Super Gacor</span>
@@ -606,13 +606,14 @@
                                 <div class="price-label">Harga</div>
                                 <div class="price">Rp 2.500.000</div>
                             </div>
-                            <a href="https://wa.me/6281329648883?text=Halo%20Kicau%20Mania,%20saya%20tertarik%20dengan%20Murai%20Batu%20Medan" class="btn-order">
+                            <a href="https://wa.me/6282329158690?text=Halo%20Kicau%20Mania,%20saya%20tertarik%20dengan%20Murai%20Batu%20Medan" target="_blank" rel="noopener" class="btn-order">
                                 <i class="fa-brands fa-whatsapp"></i> Beli
                             </a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Lovebird -->
                 <div class="bird-card">
                     <div class="card-img-wrapper">
                         <span class="badge">Suara Merdu</span>
@@ -620,19 +621,20 @@
                     </div>
                     <div class="bird-content">
                         <h3>Lovebird Biola</h3>
-                        <p>Warna  cerah eksotis, aktif, durasi kekekan stabil cocok untuk teras maupun lomba.</p>
+                        <p>Warna cerah eksotis, aktif, durasi kekekan stabil cocok untuk teras maupun lomba.</p>
                         <div class="card-footer">
                             <div class="price-box">
                                 <div class="price-label">Harga</div>
                                 <div class="price">Rp 450.000</div>
                             </div>
-                            <a href="https://wa.me/6281329648883?text=Halo%20Kicau%20Mania,%20saya%20tertarik%20dengan%20Lovebird%20Biola" class="btn-order">
+                            <a href="https://wa.me/6282329158690?text=Halo%20Kicau%20Mania,%20saya%20tertarik%20dengan%20Lovebird%20Biola" target="_blank" rel="noopener" class="btn-order">
                                 <i class="fa-brands fa-whatsapp"></i> Beli
                             </a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Kacer -->
                 <div class="bird-card">
                     <div class="card-img-wrapper">
                         <span class="badge">Mental Juara</span>
@@ -646,7 +648,7 @@
                                 <div class="price-label">Harga</div>
                                 <div class="price">Rp 1.800.000</div>
                             </div>
-                            <a href="https://wa.me/6281329648883?text=Halo%20Kicau%20Mania,%20saya%20tertarik%20dengan%20Kacer%20Poci" class="btn-order">
+                            <a href="https://wa.me/6282329158690?text=Halo%20Kicau%20Mania,%20saya%20tertarik%20dengan%20Kacer%20Poci" target="_blank" rel="noopener" class="btn-order">
                                 <i class="fa-brands fa-whatsapp"></i> Beli
                             </a>
                         </div>
@@ -687,7 +689,7 @@
                     <div class="pill"><i class="fa-solid fa-phone"></i> 082329158690</div>
                     <div class="pill"><i class="fa-solid fa-envelope"></i> kicaumania@gmail.com</div>
                 </div>
-                <a href="https://wa.me/6282329158690?text=Halo%20Kicau%20Mania,%20saya%20ingin%20tanya%20stok%20burung%20yang%20ready" class="wa-large-btn">
+                <a href="https://wa.me/6282329158690?text=Halo%20Kicau%20Mania,%20saya%20ingin%20tanya%20stok%20burung%20yang%20ready" target="_blank" rel="noopener" class="wa-large-btn">
                     <i class="fa-brands fa-whatsapp"></i> Hubungi via WhatsApp
                 </a>
             </div>
@@ -695,7 +697,7 @@
     </section>
 
     <footer>
-        © 2026 Kicau Mania - Premium Bird Shop. All Rights Reserved.
+        &copy; 2026 Kicau Mania - Premium Bird Shop. All Rights Reserved.
     </footer>
 
 </body>
