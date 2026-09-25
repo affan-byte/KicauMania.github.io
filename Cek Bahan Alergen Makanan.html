@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cek Bahan Alergen Makanan</title>
+<!-- Tambahkan Library Tesseract.js di sini -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+:root{
+  --bg:#f6f5f2; --card:#ffffff; --text:#1c1a17; --sub:#6b655c;
+  --accent:#b5502e; --accent2:#2f6f5e; --border:#e7e3db;
+  --warn-bg:#fdece4; --warn-text:#8a3418;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#171512; --card:#221f1b; --text:#f2ede6; --sub:#a89f92;
+    --accent:#e2825c; --accent2:#67c2a4; --border:#3a352d;
+    --warn-bg:#3a231c; --warn-text:#f3b79e;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171512; --card:#221f1b; --text:#f2ede6; --sub:#a89f92;
+  --accent:#e2825c; --accent2:#67c2a4; --border:#3a352d;
+  --warn-bg:#3a231c; --warn-text:#f3b79e;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:'Segoe UI',Roboto,-apple-system,Helvetica,Arial,sans-serif;
+  min-height:100%;
+}
+.wrap{max-width:760px; margin:0 auto; padding:28px 18px 60px;}
+h1{font-size:1.5rem; margin:0 0 4px;}
+.sub{color:var(--sub); margin:0 0 18px; font-size:.95rem;}
+.tabs{display:flex; gap:8px; margin-bottom:16px;}
+.tab{
+  flex:1; padding:11px; text-align:center; border-radius:10px; cursor:pointer;
+  border:1px solid var(--border); background:var(--card); color:var(--sub); font-weight:600; font-size:.92rem;
+}
+.tab.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+.panel{display:none;}
+.panel.active{display:block;}
+textarea{
+  width:100%; min-height:130px; padding:14px; border-radius:12px;
+  border:1px solid var(--border); background:var(--card); color:var(--text);
+  font-size:1rem; resize:vertical; font-family:inherit;
+}
+textarea:focus{outline:2px solid var(--accent2);}
+.btn{
+  margin-top:12px; padding:12px 22px; border:none; border-radius:10px;
+  background:var(--accent); color:#fff; font-size:1rem; font-weight:600;
+  cursor:pointer;
+}
+.btn:disabled{opacity:.55; cursor:default;}
+.btn:hover:not(:disabled){filter:brightness(1.08);}
+.btn.secondary{background:transparent; color:var(--sub); border:1px solid var(--border); margin-left:8px;}
+.photo-card{margin-bottom:2px;}
+.drop-area{
+  border:2px dashed var(--border); border-radius:14px; padding:36px 20px;
+  text-align:center; background:var(--card); cursor:pointer; transition:border-color .15s;
+}
+.drop-area:hover, .drop-area:focus-visible{border-color:var(--accent2); outline:none;}
+.drop-area .icon{font-size:2rem; display:block; margin-bottom:8px;}
+.drop-area .txt{color:var(--sub); font-size:.92rem; line-height:1.5;}
+.preview-wrap{
+  position:relative; border-radius:14px; overflow:hidden; border:1px solid var(--border);
+  background:var(--card); max-height:340px; display:flex; align-items:center; justify-content:center;
+}
+#preview{display:block; width:100%; max-height:340px; object-fit:contain; background:var(--bg);}
+.remove-btn{
+  position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%;
+  border:none; background:rgba(0,0,0,.55); color:#fff; font-size:1rem; line-height:1;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.remove-btn:hover{background:rgba(0,0,0,.75);}
+.status{margin-top:12px; font-size:.9rem; color:var(--sub);}
+#result{margin-top:26px;}
+.summary{
+  background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:18px; margin-bottom:16px;
+}
+.summary h2{margin:0 0 10px; font-size:1.05rem;}
+.chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+.chip{
+  padding:6px 12px; border-radius:999px; font-size:.85rem; font-weight:600;
+  background:var(--warn-bg); color:var(--warn-text); border:1px solid var(--border);
+}
+.ok{color:var(--accent2); font-weight:600;}
+.errtext{color:var(--warn-text); font-weight:600;}
+.warnlist{list-style:none; padding:0; margin:14px 0 0;}
+.warnlist li{
+  padding:10px 12px; border-radius:10px; background:var(--warn-bg); color:var(--warn-text);
+  margin-bottom:8px; font-size:.92rem;
+}
+.textbox{
+  background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:18px; line-height:1.7; font-size:.98rem; overflow-x:auto;
+}
+mark{padding:1px 4px; border-radius:5px; font-weight:600; color:#fff;}
+.legend{margin-top:20px; display:flex; flex-wrap:wrap; gap:10px; font-size:.82rem; color:var(--sub);}
+.legend span{display:inline-flex; align-items:center; gap:6px;}
+.dot{width:10px; height:10px; border-radius:50%; display:inline-block;}
+footer{margin-top:30px; font-size:.78rem; color:var(--sub); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🥜 Cek Bahan Alergen Makanan</h1>
+  <p class="sub">Tempel komposisi snack, atau foto langsung label kemasannya. Web akan mendeteksi alergen dan bahan buatan.</p>
+
+  <div class="tabs">
+    <div class="tab active" id="tabText" onclick="switchTab('text')">📝 Ketik Teks</div>
+    <div class="tab" id="tabPhoto" onclick="switchTab('photo')">📷 Upload / Foto</div>
+  </div>
+
+  <div class="panel active" id="panelText">
+    <textarea id="input" placeholder="Contoh: Tepung terigu, gula, minyak nabati, susu bubuk, telur, penguat rasa (mononatrium glutamat), pengemulsi lesitin kedelai, pewarna tartrazin CI 19140, pemanis aspartam..."></textarea>
+    <div>
+      <button class="btn" onclick="scanText()">🔍 Scan Komposisi</button>
+      <button class="btn secondary" onclick="clearAll()">Bersihkan</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panelPhoto">
+    <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="onPhotoChosen(event)">
+
+    <div class="photo-card">
+      <div class="drop-area" id="dropArea" role="button" tabindex="0" onclick="triggerFileInput()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();triggerFileInput();}">
+        <span class="icon">📷</span>
+        <span class="txt">Ketuk untuk ambil foto atau upload gambar label komposisi</span>
+      </div>
+      <div class="preview-wrap" id="previewWrap" style="display:none;">
+        <img id="preview" alt="Pratinjau foto">
+        <button class="remove-btn" type="button" onclick="resetPhoto()" aria-label="Hapus foto">✕</button>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <button class="btn" id="btnProcessPhoto" onclick="processPhoto()" disabled>🔍 Proses Foto</button>
+      <button class="btn secondary" onclick="triggerFileInput()">Pilih Foto Lain</button>
+    </div>
+    <div class="status" id="photoStatus"></div>
+  </div>
+
+  <div id="result"></div>
+  <div class="legend" id="legend"></div>
+  <footer>Alat bantu deteksi berdasarkan kata kunci umum dan pembacaan gambar otomatis — bukan pengganti label resmi atau saran medis. Selalu periksa kemasan asli dan konsultasikan alergi serius ke dokter.</footer>
+</div>
+
+<script>
+const CATEGORIES = [
+  {key:"kacang", label:"Kacang-kacangan", color:"#b5502e",
+   words:["kacang tanah","kacang almond","almond","kacang mete","mete","kacang walnut","walnut","hazelnut","pistachio","kacang kedelai","kacang polong","kacang"],
+   msg:"Mengandung kacang-kacangan — risiko tinggi untuk penderita alergi kacang."},
+  {key:"susu", label:"Produk Susu", color:"#2f6f5e",
+   words:["susu bubuk","susu skim","susu full cream","krimer nabati","whey","kasein","laktosa","keju","mentega","krim","susu"],
+   msg:"Mengandung produk susu (dairy) — perlu diwaspadai oleh penderita intoleransi laktosa atau alergi susu."},
+  {key:"telur", label:"Telur", color:"#c98a1e",
+   words:["telur ayam","putih telur","kuning telur","albumin","ovalbumin","telur"],
+   msg:"Mengandung telur — perlu diwaspadai oleh penderita alergi telur."},
+  {key:"gluten", label:"Gluten/Gandum", color:"#8a5a2b",
+   words:["tepung terigu","gandum utuh","gluten","barley","jelai","malt","gandum"],
+   msg:"Mengandung gluten/gandum — tidak aman untuk penderita celiac atau sensitivitas gluten."},
+  {key:"kedelai", label:"Kedelai", color:"#5a7d2c",
+   words:["lesitin kedelai","kedelai","soya","tahu","tempe"],
+   msg:"Mengandung kedelai (soya) — salah satu pemicu alergi umum."},
+  {key:"seafood", label:"Makanan Laut", color:"#1f6f8b",
+   words:["udang","kepiting","cumi","kerang","tiram","ikan teri","ikan"],
+   msg:"Mengandung bahan makanan laut — risiko alergi seafood."},
+  {key:"wijen", label:"Wijen", color:"#7a5230",
+   words:["wijen","biji wijen"],
+   msg:"Mengandung wijen — salah satu alergen yang cukup sering dilaporkan."},
+  {key:"msg", label:"Penguat Rasa (MSG)", color:"#9c3d54",
+   words:["monosodium glutamat","mononatrium glutamat","msg","penguat rasa"],
+   msg:"Mengandung penguat rasa (MSG) — sebagian orang sensitif terhadap MSG (sakit kepala, mual)."},
+  {key:"pemanis", label:"Pemanis Buatan", color:"#8342a3",
+   words:["aspartam","sakarin","sukralosa","acesulfame","asesulfam","siklamat","pemanis buatan"],
+   msg:"Mengandung pemanis buatan — perlu diwaspadai bagi yang sensitif terhadap pemanis sintetis."},
+  {key:"pewarna", label:"Pewarna Buatan", color:"#c2622f",
+   words:["tartrazin","ci 19140","sunset yellow","ponceau","pewarna buatan","pewarna sintetis"],
+   msg:"Mengandung pewarna buatan — beberapa pewarna sintetis dikaitkan dengan reaksi hiperaktivitas pada anak."},
+  {key:"pengawet", label:"Pengawet", color:"#556b7a",
+   words:["natrium benzoat","kalium sorbat","kalium metabisulfit","sulfit","bha","bht","pengawet"],
+   msg:"Mengandung bahan pengawet buatan."}
+];
+
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function buildLegend(){
+  document.getElementById('legend').innerHTML = CATEGORIES.map(c =>
+    `<span><span class="dot" style="background:${c.color}"></span>${c.label}</span>`
+  ).join("");
+}
+buildLegend();
+
+function switchTab(which){
+  document.getElementById('tabText').classList.toggle('active', which==='text');
+  document.getElementById('tabPhoto').classList.toggle('active', which==='photo');
+  document.getElementById('panelText').classList.toggle('active', which==='text');
+  document.getElementById('panelPhoto').classList.toggle('active', which==='photo');
+}
+
+function scanText(){
+  const raw = document.getElementById('input').value.trim();
+  const resultDiv = document.getElementById('result');
+  if(!raw){
+    resultDiv.innerHTML = `<div class="summary"><p class="ok">Tempelkan atau proses komposisi terlebih dahulu.</p></div>`;
+    return;
+  }
+  const lower = raw.toLowerCase();
+  const found = [];
+  CATEGORIES.forEach(cat=>{
+    const matchedWords = cat.words.filter(w => lower.includes(w));
+    if(matchedWords.length){ found.push({...cat, matched: [...new Set(matchedWords)]}); }
+  });
+
+  let highlighted = escapeHtml(raw);
+  const allWords = [];
+  found.forEach(cat=> cat.matched.forEach(w=> allWords.push({word:w, color:cat.color})));
+  allWords.sort((a,b)=> b.word.length - a.word.length);
+  allWords.forEach(({word,color})=>{
+    const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('('+escapedWord+')', 'gi');
+    highlighted = highlighted.replace(re, m => `<mark style="background:${color}">${m}</mark>`);
+  });
+
+  let html = '';
+  if(found.length === 0){
+    html += `<div class="summary"><h2>Hasil Pemindaian</h2><p class="ok">✅ Tidak terdeteksi kata kunci alergen atau bahan buatan umum dari daftar kami.</p></div>`;
+  } else {
+    html += `<div class="summary"><h2>Terdeteksi ${found.length} kategori bahan perlu perhatian</h2>`;
+    html += `<div class="chip-row">` + found.map(f=>`<span class="chip" style="background:${f.color}22;color:${f.color};border-color:${f.color}55">${f.label}</span>`).join("") + `</div>`;
+    html += `<ul class="warnlist">` + found.map(f=>`<li>⚠️ ${f.msg} <em>(terdeteksi: ${f.matched.join(", ")})</em></li>`).join("") + `</ul>`;
+    html += `</div>`;
+  }
+  html += `<div class="textbox"><strong>Teks komposisi (kata kunci disorot):</strong><br><br>${highlighted}</div>`;
+  resultDiv.innerHTML = html;
+}
+
+function clearAll(){
+  document.getElementById('input').value = '';
+  document.getElementById('result').innerHTML = '';
+}
+
+// ---------- Photo / OCR flow menggunakan Tesseract.js ----------
+let chosenFile = null;
+
+function triggerFileInput(){
+  document.getElementById('photoInput').click();
+}
+
+function onPhotoChosen(e){
+  const file = e.target.files && e.target.files[0];
+  const statusEl = document.getElementById('photoStatus');
+  statusEl.textContent = '';
+  if(!file){ return; }
+  chosenFile = file;
+
+  const preview = document.getElementById('preview');
+  const dropArea = document.getElementById('dropArea');
+  const previewWrap = document.getElementById('previewWrap');
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    preview.src = reader.result;
+    dropArea.style.display = 'none';
+    previewWrap.style.display = 'flex';
+  };
+  reader.onerror = ()=>{
+    statusEl.innerHTML = `<span class="errtext">Gagal membaca file gambar. Coba pilih foto lain.</span>`;
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('btnProcessPhoto').disabled = false;
+}
+
+function resetPhoto(){
+  chosenFile = null;
+  const input = document.getElementById('photoInput');
+  input.value = '';
+  document.getElementById('preview').src = '';
+  document.getElementById('previewWrap').style.display = 'none';
+  document.getElementById('dropArea').style.display = 'block';
+  document.getElementById('btnProcessPhoto').disabled = true;
+  document.getElementById('photoStatus').textContent = '';
+}
+
+async function processPhoto(){
+  const statusEl = document.getElementById('photoStatus');
+  const btn = document.getElementById('btnProcessPhoto');
+  if(!chosenFile){ statusEl.textContent = 'Pilih foto terlebih dahulu.'; return; }
+
+  btn.disabled = true;
+  statusEl.innerHTML = 'Membaca teks dari foto (mungkin butuh beberapa detik)...';
+
+  try {
+    // Menjalankan OCR dengan Tesseract.js (Bahasa Indonesia & Inggris)
+    const result = await Tesseract.recognize(
+      chosenFile,
+      'ind+eng', 
+      {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            statusEl.innerHTML = `Membaca teks... ${Math.round(m.progress * 100)}% selesai.`;
+          }
+        }
+      }
+    );
+
+    const extractedText = result.data.text.trim();
+
+    if (!extractedText) {
+      statusEl.innerHTML = `<span class="errtext">Teks tidak terbaca. Pastikan foto terang dan fokus pada bagian komposisi.</span>`;
+      btn.disabled = false;
+      return;
+    }
+
+    statusEl.innerHTML = `<span class="ok">✅ Foto berhasil dibaca! Mengalihkan ke hasil...</span>`;
+
+    // Masukkan teks ke area input
+    document.getElementById('input').value = extractedText;
+    
+    // Pindah ke tab teks dan pindai otomatis
+    switchTab('text');
+    scanText();
+
+  } catch (error) {
+    console.error(error);
+    statusEl.innerHTML = `<span class="errtext">Gagal memproses foto. Pastikan ada koneksi internet.</span>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
