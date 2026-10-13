@@ -1,340 +1,244 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cek Bahan Alergen Makanan</title>
-<!-- Tambahkan Library Tesseract.js di sini -->
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<style>
-:root{
-  --bg:#f6f5f2; --card:#ffffff; --text:#1c1a17; --sub:#6b655c;
-  --accent:#b5502e; --accent2:#2f6f5e; --border:#e7e3db;
-  --warn-bg:#fdece4; --warn-text:#8a3418;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#171512; --card:#221f1b; --text:#f2ede6; --sub:#a89f92;
-    --accent:#e2825c; --accent2:#67c2a4; --border:#3a352d;
-    --warn-bg:#3a231c; --warn-text:#f3b79e;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#171512; --card:#221f1b; --text:#f2ede6; --sub:#a89f92;
-  --accent:#e2825c; --accent2:#67c2a4; --border:#3a352d;
-  --warn-bg:#3a231c; --warn-text:#f3b79e;
-}
-html{scroll-padding-top:env(safe-area-inset-top,0px);}
-*{box-sizing:border-box;}
-body{
-  margin:0; background:var(--bg); color:var(--text);
-  font-family:'Segoe UI',Roboto,-apple-system,Helvetica,Arial,sans-serif;
-  min-height:100%;
-}
-.wrap{max-width:760px; margin:0 auto; padding:28px 18px 60px;}
-h1{font-size:1.5rem; margin:0 0 4px;}
-.sub{color:var(--sub); margin:0 0 18px; font-size:.95rem;}
-.tabs{display:flex; gap:8px; margin-bottom:16px;}
-.tab{
-  flex:1; padding:11px; text-align:center; border-radius:10px; cursor:pointer;
-  border:1px solid var(--border); background:var(--card); color:var(--sub); font-weight:600; font-size:.92rem;
-}
-.tab.active{background:var(--accent); color:#fff; border-color:var(--accent);}
-.panel{display:none;}
-.panel.active{display:block;}
-textarea{
-  width:100%; min-height:130px; padding:14px; border-radius:12px;
-  border:1px solid var(--border); background:var(--card); color:var(--text);
-  font-size:1rem; resize:vertical; font-family:inherit;
-}
-textarea:focus{outline:2px solid var(--accent2);}
-.btn{
-  margin-top:12px; padding:12px 22px; border:none; border-radius:10px;
-  background:var(--accent); color:#fff; font-size:1rem; font-weight:600;
-  cursor:pointer;
-}
-.btn:disabled{opacity:.55; cursor:default;}
-.btn:hover:not(:disabled){filter:brightness(1.08);}
-.btn.secondary{background:transparent; color:var(--sub); border:1px solid var(--border); margin-left:8px;}
-.photo-card{margin-bottom:2px;}
-.drop-area{
-  border:2px dashed var(--border); border-radius:14px; padding:36px 20px;
-  text-align:center; background:var(--card); cursor:pointer; transition:border-color .15s;
-}
-.drop-area:hover, .drop-area:focus-visible{border-color:var(--accent2); outline:none;}
-.drop-area .icon{font-size:2rem; display:block; margin-bottom:8px;}
-.drop-area .txt{color:var(--sub); font-size:.92rem; line-height:1.5;}
-.preview-wrap{
-  position:relative; border-radius:14px; overflow:hidden; border:1px solid var(--border);
-  background:var(--card); max-height:340px; display:flex; align-items:center; justify-content:center;
-}
-#preview{display:block; width:100%; max-height:340px; object-fit:contain; background:var(--bg);}
-.remove-btn{
-  position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%;
-  border:none; background:rgba(0,0,0,.55); color:#fff; font-size:1rem; line-height:1;
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
-}
-.remove-btn:hover{background:rgba(0,0,0,.75);}
-.status{margin-top:12px; font-size:.9rem; color:var(--sub);}
-#result{margin-top:26px;}
-.summary{
-  background:var(--card); border:1px solid var(--border); border-radius:14px;
-  padding:18px; margin-bottom:16px;
-}
-.summary h2{margin:0 0 10px; font-size:1.05rem;}
-.chip-row{display:flex; flex-wrap:wrap; gap:8px;}
-.chip{
-  padding:6px 12px; border-radius:999px; font-size:.85rem; font-weight:600;
-  background:var(--warn-bg); color:var(--warn-text); border:1px solid var(--border);
-}
-.ok{color:var(--accent2); font-weight:600;}
-.errtext{color:var(--warn-text); font-weight:600;}
-.warnlist{list-style:none; padding:0; margin:14px 0 0;}
-.warnlist li{
-  padding:10px 12px; border-radius:10px; background:var(--warn-bg); color:var(--warn-text);
-  margin-bottom:8px; font-size:.92rem;
-}
-.textbox{
-  background:var(--card); border:1px solid var(--border); border-radius:14px;
-  padding:18px; line-height:1.7; font-size:.98rem; overflow-x:auto;
-}
-mark{padding:1px 4px; border-radius:5px; font-weight:600; color:#fff;}
-.legend{margin-top:20px; display:flex; flex-wrap:wrap; gap:10px; font-size:.82rem; color:var(--sub);}
-.legend span{display:inline-flex; align-items:center; gap:6px;}
-.dot{width:10px; height:10px; border-radius:50%; display:inline-block;}
-footer{margin-top:30px; font-size:.78rem; color:var(--sub); text-align:center;}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <h1>🥜 Cek Bahan Alergen Makanan</h1>
-  <p class="sub">Tempel komposisi snack, atau foto langsung label kemasannya. Web akan mendeteksi alergen dan bahan buatan.</p>
-
-  <div class="tabs">
-    <div class="tab active" id="tabText" onclick="switchTab('text')">📝 Ketik Teks</div>
-    <div class="tab" id="tabPhoto" onclick="switchTab('photo')">📷 Upload / Foto</div>
-  </div>
-
-  <div class="panel active" id="panelText">
-    <textarea id="input" placeholder="Contoh: Tepung terigu, gula, minyak nabati, susu bubuk, telur, penguat rasa (mononatrium glutamat), pengemulsi lesitin kedelai, pewarna tartrazin CI 19140, pemanis aspartam..."></textarea>
-    <div>
-      <button class="btn" onclick="scanText()">🔍 Scan Komposisi</button>
-      <button class="btn secondary" onclick="clearAll()">Bersihkan</button>
-    </div>
-  </div>
-
-  <div class="panel" id="panelPhoto">
-    <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="onPhotoChosen(event)">
-
-    <div class="photo-card">
-      <div class="drop-area" id="dropArea" role="button" tabindex="0" onclick="triggerFileInput()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();triggerFileInput();}">
-        <span class="icon">📷</span>
-        <span class="txt">Ketuk untuk ambil foto atau upload gambar label komposisi</span>
-      </div>
-      <div class="preview-wrap" id="previewWrap" style="display:none;">
-        <img id="preview" alt="Pratinjau foto">
-        <button class="remove-btn" type="button" onclick="resetPhoto()" aria-label="Hapus foto">✕</button>
-      </div>
-    </div>
-
-    <div style="margin-top:12px;">
-      <button class="btn" id="btnProcessPhoto" onclick="processPhoto()" disabled>🔍 Proses Foto</button>
-      <button class="btn secondary" onclick="triggerFileInput()">Pilih Foto Lain</button>
-    </div>
-    <div class="status" id="photoStatus"></div>
-  </div>
-
-  <div id="result"></div>
-  <div class="legend" id="legend"></div>
-  <footer>Alat bantu deteksi berdasarkan kata kunci umum dan pembacaan gambar otomatis — bukan pengganti label resmi atau saran medis. Selalu periksa kemasan asli dan konsultasikan alergi serius ke dokter.</footer>
-</div>
-
-<script>
-const CATEGORIES = [
-  {key:"kacang", label:"Kacang-kacangan", color:"#b5502e",
-   words:["kacang tanah","kacang almond","almond","kacang mete","mete","kacang walnut","walnut","hazelnut","pistachio","kacang kedelai","kacang polong","kacang"],
-   msg:"Mengandung kacang-kacangan — risiko tinggi untuk penderita alergi kacang."},
-  {key:"susu", label:"Produk Susu", color:"#2f6f5e",
-   words:["susu bubuk","susu skim","susu full cream","krimer nabati","whey","kasein","laktosa","keju","mentega","krim","susu"],
-   msg:"Mengandung produk susu (dairy) — perlu diwaspadai oleh penderita intoleransi laktosa atau alergi susu."},
-  {key:"telur", label:"Telur", color:"#c98a1e",
-   words:["telur ayam","putih telur","kuning telur","albumin","ovalbumin","telur"],
-   msg:"Mengandung telur — perlu diwaspadai oleh penderita alergi telur."},
-  {key:"gluten", label:"Gluten/Gandum", color:"#8a5a2b",
-   words:["tepung terigu","gandum utuh","gluten","barley","jelai","malt","gandum"],
-   msg:"Mengandung gluten/gandum — tidak aman untuk penderita celiac atau sensitivitas gluten."},
-  {key:"kedelai", label:"Kedelai", color:"#5a7d2c",
-   words:["lesitin kedelai","kedelai","soya","tahu","tempe"],
-   msg:"Mengandung kedelai (soya) — salah satu pemicu alergi umum."},
-  {key:"seafood", label:"Makanan Laut", color:"#1f6f8b",
-   words:["udang","kepiting","cumi","kerang","tiram","ikan teri","ikan"],
-   msg:"Mengandung bahan makanan laut — risiko alergi seafood."},
-  {key:"wijen", label:"Wijen", color:"#7a5230",
-   words:["wijen","biji wijen"],
-   msg:"Mengandung wijen — salah satu alergen yang cukup sering dilaporkan."},
-  {key:"msg", label:"Penguat Rasa (MSG)", color:"#9c3d54",
-   words:["monosodium glutamat","mononatrium glutamat","msg","penguat rasa"],
-   msg:"Mengandung penguat rasa (MSG) — sebagian orang sensitif terhadap MSG (sakit kepala, mual)."},
-  {key:"pemanis", label:"Pemanis Buatan", color:"#8342a3",
-   words:["aspartam","sakarin","sukralosa","acesulfame","asesulfam","siklamat","pemanis buatan"],
-   msg:"Mengandung pemanis buatan — perlu diwaspadai bagi yang sensitif terhadap pemanis sintetis."},
-  {key:"pewarna", label:"Pewarna Buatan", color:"#c2622f",
-   words:["tartrazin","ci 19140","sunset yellow","ponceau","pewarna buatan","pewarna sintetis"],
-   msg:"Mengandung pewarna buatan — beberapa pewarna sintetis dikaitkan dengan reaksi hiperaktivitas pada anak."},
-  {key:"pengawet", label:"Pengawet", color:"#556b7a",
-   words:["natrium benzoat","kalium sorbat","kalium metabisulfit","sulfit","bha","bht","pengawet"],
-   msg:"Mengandung bahan pengawet buatan."}
-];
-
-function escapeHtml(s){
-  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-function buildLegend(){
-  document.getElementById('legend').innerHTML = CATEGORIES.map(c =>
-    `<span><span class="dot" style="background:${c.color}"></span>${c.label}</span>`
-  ).join("");
-}
-buildLegend();
-
-function switchTab(which){
-  document.getElementById('tabText').classList.toggle('active', which==='text');
-  document.getElementById('tabPhoto').classList.toggle('active', which==='photo');
-  document.getElementById('panelText').classList.toggle('active', which==='text');
-  document.getElementById('panelPhoto').classList.toggle('active', which==='photo');
-}
-
-function scanText(){
-  const raw = document.getElementById('input').value.trim();
-  const resultDiv = document.getElementById('result');
-  if(!raw){
-    resultDiv.innerHTML = `<div class="summary"><p class="ok">Tempelkan atau proses komposisi terlebih dahulu.</p></div>`;
-    return;
-  }
-  const lower = raw.toLowerCase();
-  const found = [];
-  CATEGORIES.forEach(cat=>{
-    const matchedWords = cat.words.filter(w => lower.includes(w));
-    if(matchedWords.length){ found.push({...cat, matched: [...new Set(matchedWords)]}); }
-  });
-
-  let highlighted = escapeHtml(raw);
-  const allWords = [];
-  found.forEach(cat=> cat.matched.forEach(w=> allWords.push({word:w, color:cat.color})));
-  allWords.sort((a,b)=> b.word.length - a.word.length);
-  allWords.forEach(({word,color})=>{
-    const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp('('+escapedWord+')', 'gi');
-    highlighted = highlighted.replace(re, m => `<mark style="background:${color}">${m}</mark>`);
-  });
-
-  let html = '';
-  if(found.length === 0){
-    html += `<div class="summary"><h2>Hasil Pemindaian</h2><p class="ok">✅ Tidak terdeteksi kata kunci alergen atau bahan buatan umum dari daftar kami.</p></div>`;
-  } else {
-    html += `<div class="summary"><h2>Terdeteksi ${found.length} kategori bahan perlu perhatian</h2>`;
-    html += `<div class="chip-row">` + found.map(f=>`<span class="chip" style="background:${f.color}22;color:${f.color};border-color:${f.color}55">${f.label}</span>`).join("") + `</div>`;
-    html += `<ul class="warnlist">` + found.map(f=>`<li>⚠️ ${f.msg} <em>(terdeteksi: ${f.matched.join(", ")})</em></li>`).join("") + `</ul>`;
-    html += `</div>`;
-  }
-  html += `<div class="textbox"><strong>Teks komposisi (kata kunci disorot):</strong><br><br>${highlighted}</div>`;
-  resultDiv.innerHTML = html;
-}
-
-function clearAll(){
-  document.getElementById('input').value = '';
-  document.getElementById('result').innerHTML = '';
-}
-
-// ---------- Photo / OCR flow menggunakan Tesseract.js ----------
-let chosenFile = null;
-
-function triggerFileInput(){
-  document.getElementById('photoInput').click();
-}
-
-function onPhotoChosen(e){
-  const file = e.target.files && e.target.files[0];
-  const statusEl = document.getElementById('photoStatus');
-  statusEl.textContent = '';
-  if(!file){ return; }
-  chosenFile = file;
-
-  const preview = document.getElementById('preview');
-  const dropArea = document.getElementById('dropArea');
-  const previewWrap = document.getElementById('previewWrap');
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    preview.src = reader.result;
-    dropArea.style.display = 'none';
-    previewWrap.style.display = 'flex';
-  };
-  reader.onerror = ()=>{
-    statusEl.innerHTML = `<span class="errtext">Gagal membaca file gambar. Coba pilih foto lain.</span>`;
-  };
-  reader.readAsDataURL(file);
-  document.getElementById('btnProcessPhoto').disabled = false;
-}
-
-function resetPhoto(){
-  chosenFile = null;
-  const input = document.getElementById('photoInput');
-  input.value = '';
-  document.getElementById('preview').src = '';
-  document.getElementById('previewWrap').style.display = 'none';
-  document.getElementById('dropArea').style.display = 'block';
-  document.getElementById('btnProcessPhoto').disabled = true;
-  document.getElementById('photoStatus').textContent = '';
-}
-
-async function processPhoto(){
-  const statusEl = document.getElementById('photoStatus');
-  const btn = document.getElementById('btnProcessPhoto');
-  if(!chosenFile){ statusEl.textContent = 'Pilih foto terlebih dahulu.'; return; }
-
-  btn.disabled = true;
-  statusEl.innerHTML = 'Membaca teks dari foto (mungkin butuh beberapa detik)...';
-
-  try {
-    // Menjalankan OCR dengan Tesseract.js (Bahasa Indonesia & Inggris)
-    const result = await Tesseract.recognize(
-      chosenFile,
-      'ind+eng', 
-      {
-        logger: m => {
-          if (m.status === 'recognizing text') {
-            statusEl.innerHTML = `Membaca teks... ${Math.round(m.progress * 100)}% selesai.`;
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Movie Generator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
         }
-      }
-    );
+        
+        /* Fade-in animation for the movie card */
+        .fade-in {
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
 
-    const extractedText = result.data.text.trim();
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
 
-    if (!extractedText) {
-      statusEl.innerHTML = `<span class="errtext">Teks tidak terbaca. Pastikan foto terang dan fokus pada bagian komposisi.</span>`;
-      btn.disabled = false;
-      return;
-    }
+        /* Glassmorphism utility */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen text-white flex items-center justify-center p-4">
 
-    statusEl.innerHTML = `<span class="ok">✅ Foto berhasil dibaca! Mengalihkan ke hasil...</span>`;
+    <main class="glass-card rounded-3xl shadow-2xl p-8 max-w-lg w-full relative overflow-hidden transition-all duration-300">
+        
+        <!-- Decorative background elements -->
+        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full bg-pink-500 opacity-20 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-40 h-40 rounded-full bg-teal-500 opacity-20 blur-3xl"></div>
 
-    // Masukkan teks ke area input
-    document.getElementById('input').value = extractedText;
-    
-    // Pindah ke tab teks dan pindai otomatis
-    switchTab('text');
-    scanText();
+        <!-- Header -->
+        <div class="text-center relative z-10 mb-8">
+            <h1 class="text-4xl font-extrabold mb-2 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-cyan-400">
+                Random Movie<br>Generator
+            </h1>
+            <p class="text-gray-300 text-sm">Bosan? Cari tahu film apa yang harus kamu tonton selanjutnya!</p>
+        </div>
 
-  } catch (error) {
-    console.error(error);
-    statusEl.innerHTML = `<span class="errtext">Gagal memproses foto. Pastikan ada koneksi internet.</span>`;
-  } finally {
-    btn.disabled = false;
-  }
-}
-</script>
+        <!-- Movie Details Container (Initially Hidden) -->
+        <div id="movie-container" class="hidden relative z-10 mb-8">
+            <div class="text-center">
+                <h2 id="movie-title" class="text-3xl font-bold mb-3 leading-tight">Movie Title</h2>
+                
+                <div class="flex flex-wrap justify-center gap-2 mb-4">
+                    <span id="movie-year" class="bg-indigo-600/60 text-indigo-100 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide border border-indigo-500/50">
+                        2023
+                    </span>
+                    <span id="movie-genre" class="bg-pink-600/60 text-pink-100 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide border border-pink-500/50">
+                        Sci-Fi
+                    </span>
+                </div>
+                
+                <div class="bg-black/30 rounded-2xl p-5 border border-white/5">
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 text-left">Synopsis</h3>
+                    <p id="movie-synopsis" class="text-gray-200 text-sm leading-relaxed text-left">
+                        Movie synopsis goes here.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Placeholder Empty State -->
+        <div id="empty-state" class="text-center relative z-10 mb-8 py-8 border-2 border-dashed border-white/20 rounded-2xl">
+            <span class="text-4xl block mb-2">🍿</span>
+            <p class="text-gray-400 text-sm">Klik tombol di bawah untuk mendapatkan rekomendasi.</p>
+        </div>
+
+        <!-- Action Button -->
+        <button id="generate-btn" class="relative z-10 w-full bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-500/30 active:scale-95 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+            </svg>
+            Get a Random Movie
+        </button>
+
+    </main>
+
+    <script>
+        // Array containing a diverse list of movies (including Indonesian hits)
+        const movies = [
+            {
+                title: "The Raid: Redemption",
+                year: "2011",
+                genre: "Action / Martial Arts",
+                synopsis: "Pasukan khusus elit terperangkap dalam sebuah gedung apartemen bertingkat tinggi yang dikuasai oleh gembong narkoba yang kejam dan pasukan pembunuhnya. Mereka harus berjuang melewati setiap lantai untuk bertahan hidup."
+            },
+            {
+                title: "Ada Apa dengan Cinta?",
+                year: "2002",
+                genre: "Romance / Drama",
+                synopsis: "Cinta, seorang gadis SMA yang populer, hidupnya berubah ketika ia bertemu dengan Rangga, seorang siswa penyendiri yang mencintai puisi. Kisah cinta klasik remaja Indonesia."
+            },
+            {
+                title: "Inception",
+                year: "2010",
+                genre: "Sci-Fi / Action",
+                synopsis: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O."
+            },
+            {
+                title: "Pengabdi Setan",
+                year: "2017",
+                genre: "Horror / Thriller",
+                synopsis: "Setelah ibunya meninggal karena penyakit misterius yang berlangsung selama 3 tahun, seorang gadis dan keluarganya mulai mengalami teror mencekam di rumah mereka sendiri."
+            },
+            {
+                title: "La La Land",
+                year: "2016",
+                genre: "Romance / Musical",
+                synopsis: "While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations for the future."
+            },
+            {
+                title: "Laskar Pelangi",
+                year: "2008",
+                genre: "Drama",
+                synopsis: "Kisah inspiratif tentang sepuluh anak sekolah dari keluarga miskin di Pulau Belitung yang berjuang untuk mendapatkan pendidikan di tengah keterbatasan."
+            },
+            {
+                title: "Interstellar",
+                year: "2014",
+                genre: "Sci-Fi / Adventure",
+                synopsis: "When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team of researchers, to find a new planet for humans."
+            },
+            {
+                title: "Mad Max: Fury Road",
+                year: "2015",
+                genre: "Action / Sci-Fi",
+                synopsis: "In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler in search for her homeland with the aid of a group of female prisoners, a psychotic worshiper, and a drifter named Max."
+            },
+            {
+                title: "Parasite",
+                year: "2019",
+                genre: "Thriller / Dark Comedy",
+                synopsis: "Greed and class discrimination threaten the newly formed symbiotic relationship between the wealthy Park family and the destitute Kim clan."
+            },
+            {
+                title: "Spirited Away",
+                year: "2001",
+                genre: "Animation / Fantasy",
+                synopsis: "During her family's move to the suburbs, a sullen 10-year-old girl wanders into a world ruled by gods, witches, and spirits, and where humans are changed into beasts."
+            },
+            {
+                title: "Gundala",
+                year: "2019",
+                genre: "Action / Superhero",
+                synopsis: "Sancaka telah hidup di jalanan sejak orang tuanya meninggalkannya. Saat kota semakin tidak aman, ia harus memutuskan apakah akan terus bersembunyi atau bangkit menjadi pahlawan yang tertindas."
+            },
+            {
+                title: "Pride & Prejudice",
+                year: "2005",
+                genre: "Romance / Drama",
+                synopsis: "Sparks fly when spirited Elizabeth Bennet meets single, rich, and proud Mr. Darcy. But Mr. Darcy reluctantly finds himself falling in love with a woman beneath his class."
+            },
+            {
+                title: "The Matrix",
+                year: "1999",
+                genre: "Sci-Fi / Action",
+                synopsis: "When a beautiful stranger leads computer hacker Neo to a forbidding underworld, he discovers the shocking truth—the life he knows is the elaborate deception of an evil cyber-intelligence."
+            },
+            {
+                title: "Marlina si Pembunuh dalam Empat Babak",
+                year: "2017",
+                genre: "Thriller / Drama",
+                synopsis: "Kisah seorang janda asal Sumba yang memenggal kepala perampok yang menyerangnya, lalu melakukan perjalanan mencari keadilan dengan membawa kepala sang perampok."
+            },
+            {
+                title: "The Dark Knight",
+                year: "2008",
+                genre: "Action / Crime",
+                synopsis: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice."
+            }
+        ];
+
+        // DOM Elements
+        const generateBtn = document.getElementById('generate-btn');
+        const movieContainer = document.getElementById('movie-container');
+        const emptyState = document.getElementById('empty-state');
+        const movieTitle = document.getElementById('movie-title');
+        const movieYear = document.getElementById('movie-year');
+        const movieGenre = document.getElementById('movie-genre');
+        const movieSynopsis = document.getElementById('movie-synopsis');
+
+        // Variable to store the last picked index to avoid immediate repeats
+        let lastPickedIndex = -1;
+
+        // Function to handle the generation of a random movie
+        generateBtn.addEventListener('click', () => {
+            // Pick a random movie, ensuring it's not the same as the last one
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * movies.length);
+            } while (randomIndex === lastPickedIndex && movies.length > 1);
+            
+            lastPickedIndex = randomIndex;
+            const selectedMovie = movies[randomIndex];
+
+            // Hide empty state if it's visible
+            emptyState.style.display = 'none';
+
+            // Remove animation class to reset it
+            movieContainer.classList.remove('fade-in');
+            
+            // Force a reflow to restart animation (magic trick for CSS animations)
+            void movieContainer.offsetWidth; 
+
+            // Update DOM with new movie details
+            movieTitle.textContent = selectedMovie.title;
+            movieYear.textContent = selectedMovie.year;
+            movieGenre.textContent = selectedMovie.genre;
+            movieSynopsis.textContent = selectedMovie.synopsis;
+
+            // Show container and apply animation
+            movieContainer.classList.remove('hidden');
+            movieContainer.classList.add('fade-in');
+
+            // Button feedback (temporary text change)
+            const originalHTML = generateBtn.innerHTML;
+            generateBtn.innerHTML = '✨ Generated!';
+            setTimeout(() => {
+                generateBtn.innerHTML = originalHTML;
+            }, 800);
+        });
+    </script>
 </body>
 </html>
