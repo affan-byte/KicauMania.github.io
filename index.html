@@ -1,244 +1,442 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Movie Generator</title>
-    <!-- Load Tailwind CSS -->
+    <title>CineSpin - Random Movie Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            500: '#8b5cf6', // Violet
+                            600: '#7c3aed',
+                            accent: '#f43f5e' // Rose
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'spin-slow': 'spin 3s linear infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        
-        /* Fade-in animation for the movie card */
-        .fade-in {
-            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px) scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            min-height: 100vh;
         }
 
-        /* Glassmorphism utility */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #f43f5e;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 999px;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen text-white flex items-center justify-center p-4">
+<body class="flex flex-col items-center justify-center p-4 md:p-8">
 
-    <main class="glass-card rounded-3xl shadow-2xl p-8 max-w-lg w-full relative overflow-hidden transition-all duration-300">
-        
-        <!-- Decorative background elements -->
-        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full bg-pink-500 opacity-20 blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-40 h-40 rounded-full bg-teal-500 opacity-20 blur-3xl"></div>
-
-        <!-- Header -->
-        <div class="text-center relative z-10 mb-8">
-            <h1 class="text-4xl font-extrabold mb-2 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-cyan-400">
-                Random Movie<br>Generator
-            </h1>
-            <p class="text-gray-300 text-sm">Bosan? Cari tahu film apa yang harus kamu tonton selanjutnya!</p>
+    <header class="w-full max-w-4xl flex justify-between items-center mb-12 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="resetToHome()">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-accent flex items-center justify-center shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">CineSpin</h1>
         </div>
+        <div class="text-xs font-semibold text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700/50">
+            TMDB API
+        </div>
+    </header>
 
-        <!-- Movie Details Container (Initially Hidden) -->
-        <div id="movie-container" class="hidden relative z-10 mb-8">
-            <div class="text-center">
-                <h2 id="movie-title" class="text-3xl font-bold mb-3 leading-tight">Movie Title</h2>
-                
-                <div class="flex flex-wrap justify-center gap-2 mb-4">
-                    <span id="movie-year" class="bg-indigo-600/60 text-indigo-100 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide border border-indigo-500/50">
-                        2023
+    <main class="w-full max-w-4xl relative min-h-[500px] flex flex-col items-center justify-center">
+        
+        <!-- ==================== VIEW 1: LANDING PAGE ==================== -->
+        <div id="view-landing" class="w-full max-w-lg text-center flex flex-col items-center gap-8 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="space-y-4">
+                <h2 class="text-4xl md:text-5xl font-extrabold leading-tight">Bingung Malam Ini <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-brand-accent">Nonton Apa?</span></h2>
+                <p class="text-slate-400 text-sm md:text-base">Biarkan kami memilihkan film terbaik untuk Anda dari jutaan koleksi database dunia.</p>
+            </div>
+
+            <div class="w-full space-y-4">
+                <button onclick="startRandomSearch(false)" class="w-full group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-gradient-to-r from-brand-500 to-brand-accent rounded-2xl hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_40px_-10px_rgba(244,63,94,0.5)]">
+                    <span class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                        Acak Film Sekarang
                     </span>
-                    <span id="movie-genre" class="bg-pink-600/60 text-pink-100 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide border border-pink-500/50">
-                        Sci-Fi
+                </button>
+
+                <button onclick="showFilters()" class="w-full inline-flex items-center justify-center px-8 py-4 font-semibold text-slate-300 transition-all duration-200 bg-slate-800/50 border border-slate-700 rounded-2xl hover:bg-slate-700 hover:text-white active:scale-[0.98]">
+                    <span class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        Pilih Tipe Film
                     </span>
-                </div>
-                
-                <div class="bg-black/30 rounded-2xl p-5 border border-white/5">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 text-left">Synopsis</h3>
-                    <p id="movie-synopsis" class="text-gray-200 text-sm leading-relaxed text-left">
-                        Movie synopsis goes here.
-                    </p>
-                </div>
+                </button>
             </div>
         </div>
 
-        <!-- Placeholder Empty State -->
-        <div id="empty-state" class="text-center relative z-10 mb-8 py-8 border-2 border-dashed border-white/20 rounded-2xl">
-            <span class="text-4xl block mb-2">🍿</span>
-            <p class="text-gray-400 text-sm">Klik tombol di bawah untuk mendapatkan rekomendasi.</p>
+        <!-- ==================== VIEW 2: FILTER PANEL ==================== -->
+        <div id="view-filters" class="hidden w-full max-w-md glass-panel rounded-3xl p-6 md:p-8 animate-fade-in-up">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-white">Tentukan Kriteria</h3>
+                <button onclick="resetToHome()" class="text-slate-400 hover:text-white transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Genre Dropdown -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">Genre Film</label>
+                    <select id="filter-genre" class="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-accent transition appearance-none">
+                        <option value="">Semua Genre</option>
+                        <option value="28">Aksi (Action)</option>
+                        <option value="12">Petualangan (Adventure)</option>
+                        <option value="16">Animasi (Animation)</option>
+                        <option value="35">Komedi (Comedy)</option>
+                        <option value="80">Kriminal (Crime)</option>
+                        <option value="18">Drama</option>
+                        <option value="14">Fantasi (Fantasy)</option>
+                        <option value="27">Horor (Horror)</option>
+                        <option value="9648">Misteri (Mystery)</option>
+                        <option value="10749">Romantis (Romance)</option>
+                        <option value="878">Fiksi Ilmiah (Sci-Fi)</option>
+                        <option value="53">Thriller</option>
+                    </select>
+                </div>
+
+                <!-- Origin Country Dropdown -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">Asal Film</label>
+                    <select id="filter-country" class="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-accent transition appearance-none">
+                        <option value="">Semua Negara</option>
+                        <option value="ID">Indonesia (ID)</option>
+                        <option value="US">Amerika Serikat (US)</option>
+                        <option value="KR">Korea Selatan (KR)</option>
+                        <option value="JP">Jepang (JP)</option>
+                        <option value="GB">Inggris (GB)</option>
+                        <option value="IN">India (IN)</option>
+                        <option value="TH">Thailand (TH)</option>
+                    </select>
+                </div>
+
+                <!-- Rating Slider -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-semibold text-slate-300">Minimal Rating (TMDB)</label>
+                        <span id="rating-display" class="bg-brand-accent/20 text-brand-accent text-xs font-bold px-2 py-1 rounded-md border border-brand-accent/30">0.0</span>
+                    </div>
+                    <input type="range" id="filter-rating" min="0" max="10" step="0.5" value="0" oninput="updateRatingDisplay(this.value)">
+                    <div class="flex justify-between text-xs text-slate-500 mt-1">
+                        <span>0</span>
+                        <span>10</span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button onclick="startRandomSearch(true)" class="w-full mt-4 flex items-center justify-center px-6 py-3.5 font-bold text-white transition-all bg-brand-accent rounded-xl hover:bg-rose-600 active:scale-[0.98] shadow-lg shadow-rose-500/30 gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                    </svg>
+                    Cari Film
+                </button>
+            </div>
         </div>
 
-        <!-- Action Button -->
-        <button id="generate-btn" class="relative z-10 w-full bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-500/30 active:scale-95 flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-            </svg>
-            Get a Random Movie
-        </button>
+        <!-- ==================== VIEW 3: LOADING ==================== -->
+        <div id="view-loading" class="hidden flex-col items-center justify-center py-20 text-center">
+            <div class="relative w-20 h-20 mb-6">
+                <div class="absolute inset-0 rounded-full border-4 border-slate-700"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-brand-accent border-t-transparent animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-2xl">🍿</div>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Menggali Database TMDB...</h3>
+            <p class="text-slate-400 text-sm animate-pulse">Menemukan film sempurna untuk Anda</p>
+        </div>
 
+        <!-- ==================== VIEW 4: RESULT CARD ==================== -->
+        <div id="view-result" class="hidden w-full">
+            <div class="glass-panel rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-2xl relative">
+                
+                <!-- Back Button inside Card -->
+                <button onclick="resetToHome()" class="absolute top-4 left-4 z-20 bg-black/50 hover:bg-black/80 backdrop-blur-md p-2 rounded-full text-white transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                </button>
+
+                <!-- Movie Poster -->
+                <div class="md:w-5/12 relative aspect-[2/3] md:aspect-auto">
+                    <img id="res-poster" src="" alt="Poster" class="w-full h-full object-cover absolute inset-0">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#1e293b] via-transparent to-transparent md:bg-gradient-to-r"></div>
+                </div>
+
+                <!-- Movie Details -->
+                <div class="md:w-7/12 p-6 md:p-10 flex flex-col justify-between relative z-10 bg-slate-900/40">
+                    <div>
+                        <!-- Meta Info -->
+                        <div class="flex flex-wrap items-center gap-3 mb-4 text-sm font-semibold">
+                            <span id="res-year" class="px-3 py-1 bg-white/10 rounded-lg text-slate-200"></span>
+                            <div class="flex items-center gap-1 px-3 py-1 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/30">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                <span id="res-rating"></span>
+                            </div>
+                        </div>
+
+                        <!-- Title -->
+                        <h2 id="res-title" class="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight"></h2>
+                        
+                        <!-- Genres -->
+                        <div id="res-genres" class="flex flex-wrap gap-2 mb-6">
+                            <!-- Injected dynamically -->
+                        </div>
+
+                        <!-- Overview -->
+                        <div class="mb-8">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Sinopsis</h4>
+                            <p id="res-overview" class="text-slate-300 text-sm md:text-base leading-relaxed line-clamp-4 hover:line-clamp-none transition-all duration-300"></p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-4 mt-auto pt-6 border-t border-white/10">
+                        <button onclick="reRollMovie()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-brand-500/30 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                            Acak Lagi!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
-        // Array containing a diverse list of movies (including Indonesian hits)
-        const movies = [
-            {
-                title: "The Raid: Redemption",
-                year: "2011",
-                genre: "Action / Martial Arts",
-                synopsis: "Pasukan khusus elit terperangkap dalam sebuah gedung apartemen bertingkat tinggi yang dikuasai oleh gembong narkoba yang kejam dan pasukan pembunuhnya. Mereka harus berjuang melewati setiap lantai untuk bertahan hidup."
-            },
-            {
-                title: "Ada Apa dengan Cinta?",
-                year: "2002",
-                genre: "Romance / Drama",
-                synopsis: "Cinta, seorang gadis SMA yang populer, hidupnya berubah ketika ia bertemu dengan Rangga, seorang siswa penyendiri yang mencintai puisi. Kisah cinta klasik remaja Indonesia."
-            },
-            {
-                title: "Inception",
-                year: "2010",
-                genre: "Sci-Fi / Action",
-                synopsis: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O."
-            },
-            {
-                title: "Pengabdi Setan",
-                year: "2017",
-                genre: "Horror / Thriller",
-                synopsis: "Setelah ibunya meninggal karena penyakit misterius yang berlangsung selama 3 tahun, seorang gadis dan keluarganya mulai mengalami teror mencekam di rumah mereka sendiri."
-            },
-            {
-                title: "La La Land",
-                year: "2016",
-                genre: "Romance / Musical",
-                synopsis: "While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations for the future."
-            },
-            {
-                title: "Laskar Pelangi",
-                year: "2008",
-                genre: "Drama",
-                synopsis: "Kisah inspiratif tentang sepuluh anak sekolah dari keluarga miskin di Pulau Belitung yang berjuang untuk mendapatkan pendidikan di tengah keterbatasan."
-            },
-            {
-                title: "Interstellar",
-                year: "2014",
-                genre: "Sci-Fi / Adventure",
-                synopsis: "When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team of researchers, to find a new planet for humans."
-            },
-            {
-                title: "Mad Max: Fury Road",
-                year: "2015",
-                genre: "Action / Sci-Fi",
-                synopsis: "In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler in search for her homeland with the aid of a group of female prisoners, a psychotic worshiper, and a drifter named Max."
-            },
-            {
-                title: "Parasite",
-                year: "2019",
-                genre: "Thriller / Dark Comedy",
-                synopsis: "Greed and class discrimination threaten the newly formed symbiotic relationship between the wealthy Park family and the destitute Kim clan."
-            },
-            {
-                title: "Spirited Away",
-                year: "2001",
-                genre: "Animation / Fantasy",
-                synopsis: "During her family's move to the suburbs, a sullen 10-year-old girl wanders into a world ruled by gods, witches, and spirits, and where humans are changed into beasts."
-            },
-            {
-                title: "Gundala",
-                year: "2019",
-                genre: "Action / Superhero",
-                synopsis: "Sancaka telah hidup di jalanan sejak orang tuanya meninggalkannya. Saat kota semakin tidak aman, ia harus memutuskan apakah akan terus bersembunyi atau bangkit menjadi pahlawan yang tertindas."
-            },
-            {
-                title: "Pride & Prejudice",
-                year: "2005",
-                genre: "Romance / Drama",
-                synopsis: "Sparks fly when spirited Elizabeth Bennet meets single, rich, and proud Mr. Darcy. But Mr. Darcy reluctantly finds himself falling in love with a woman beneath his class."
-            },
-            {
-                title: "The Matrix",
-                year: "1999",
-                genre: "Sci-Fi / Action",
-                synopsis: "When a beautiful stranger leads computer hacker Neo to a forbidding underworld, he discovers the shocking truth—the life he knows is the elaborate deception of an evil cyber-intelligence."
-            },
-            {
-                title: "Marlina si Pembunuh dalam Empat Babak",
-                year: "2017",
-                genre: "Thriller / Drama",
-                synopsis: "Kisah seorang janda asal Sumba yang memenggal kepala perampok yang menyerangnya, lalu melakukan perjalanan mencari keadilan dengan membawa kepala sang perampok."
-            },
-            {
-                title: "The Dark Knight",
-                year: "2008",
-                genre: "Action / Crime",
-                synopsis: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice."
-            }
-        ];
+        const API_KEY = '5005149e8856b76dadbe2e83298afe36';
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        
+        // State variables to keep track of current filters
+        let currentFilters = {
+            active: false,
+            genre: '',
+            country: '',
+            rating: 0
+        };
 
         // DOM Elements
-        const generateBtn = document.getElementById('generate-btn');
-        const movieContainer = document.getElementById('movie-container');
-        const emptyState = document.getElementById('empty-state');
-        const movieTitle = document.getElementById('movie-title');
-        const movieYear = document.getElementById('movie-year');
-        const movieGenre = document.getElementById('movie-genre');
-        const movieSynopsis = document.getElementById('movie-synopsis');
+        const views = {
+            landing: document.getElementById('view-landing'),
+            filters: document.getElementById('view-filters'),
+            loading: document.getElementById('view-loading'),
+            result: document.getElementById('view-result')
+        };
 
-        // Variable to store the last picked index to avoid immediate repeats
-        let lastPickedIndex = -1;
+        // Update Slider Display Text
+        function updateRatingDisplay(val) {
+            document.getElementById('rating-display').innerText = parseFloat(val).toFixed(1);
+        }
 
-        // Function to handle the generation of a random movie
-        generateBtn.addEventListener('click', () => {
-            // Pick a random movie, ensuring it's not the same as the last one
-            let randomIndex;
-            do {
-                randomIndex = Math.floor(Math.random() * movies.length);
-            } while (randomIndex === lastPickedIndex && movies.length > 1);
+        // View Management
+        function switchView(viewName) {
+            Object.values(views).forEach(v => {
+                v.classList.add('hidden');
+                v.classList.remove('flex', 'animate-fade-in-up');
+            });
             
-            lastPickedIndex = randomIndex;
-            const selectedMovie = movies[randomIndex];
-
-            // Hide empty state if it's visible
-            emptyState.style.display = 'none';
-
-            // Remove animation class to reset it
-            movieContainer.classList.remove('fade-in');
+            const targetView = views[viewName];
+            targetView.classList.remove('hidden');
             
-            // Force a reflow to restart animation (magic trick for CSS animations)
-            void movieContainer.offsetWidth; 
+            // Add flex layout for specific views
+            if(viewName === 'landing' || viewName === 'loading') {
+                targetView.classList.add('flex');
+            }
+            // Add entrance animation
+            targetView.classList.add('animate-fade-in-up');
+        }
 
-            // Update DOM with new movie details
-            movieTitle.textContent = selectedMovie.title;
-            movieYear.textContent = selectedMovie.year;
-            movieGenre.textContent = selectedMovie.genre;
-            movieSynopsis.textContent = selectedMovie.synopsis;
+        function resetToHome() {
+            switchView('landing');
+        }
 
-            // Show container and apply animation
-            movieContainer.classList.remove('hidden');
-            movieContainer.classList.add('fade-in');
+        function showFilters() {
+            switchView('filters');
+        }
 
-            // Button feedback (temporary text change)
-            const originalHTML = generateBtn.innerHTML;
-            generateBtn.innerHTML = '✨ Generated!';
-            setTimeout(() => {
-                generateBtn.innerHTML = originalHTML;
-            }, 800);
-        });
+        // Triggered when "Acak Film Sekarang" or "Cari Film" is clicked
+        function startRandomSearch(useFilters) {
+            if (useFilters) {
+                currentFilters = {
+                    active: true,
+                    genre: document.getElementById('filter-genre').value,
+                    country: document.getElementById('filter-country').value,
+                    rating: document.getElementById('filter-rating').value
+                };
+            } else {
+                // Quick random -> reset filters
+                currentFilters = { active: false, genre: '', country: '', rating: 0 };
+            }
+            fetchMovie();
+        }
+
+        // Triggered by "Acak Lagi" inside the card
+        function reRollMovie() {
+            fetchMovie();
+        }
+
+        // Main Fetch Logic
+        async function fetchMovie() {
+            switchView('loading');
+
+            // 1. Build Base URL for Discover endpoint
+            let url = `${BASE_URL}/discover/movie?api_key=${API_KEY}&language=id-ID&sort_by=popularity.desc&include_adult=false`;
+
+            // 2. Append filters if active
+            if (currentFilters.active) {
+                if (currentFilters.genre) url += `&with_genres=${currentFilters.genre}`;
+                if (currentFilters.country) url += `&with_origin_country=${currentFilters.country}`;
+                if (currentFilters.rating > 0) url += `&vote_average.gte=${currentFilters.rating}`;
+            }
+
+            try {
+                // STEP 1: Fetch Page 1 to get total_pages available based on criteria
+                const initResponse = await fetch(`${url}&page=1`);
+                const initData = await initResponse.json();
+
+                if (!initData.results || initData.results.length === 0) {
+                    alert('Maaf, tidak ada film yang sesuai dengan kriteria filter tersebut. Silakan ubah filter Anda.');
+                    if(currentFilters.active) showFilters();
+                    else resetToHome();
+                    return;
+                }
+
+                // TMDB limits paging to max 500
+                const totalPages = Math.min(initData.total_pages, 500);
+                
+                // Calculate a random page
+                const randomPage = Math.floor(Math.random() * totalPages) + 1;
+
+                // STEP 2: Fetch that specific random page
+                const finalResponse = await fetch(`${url}&page=${randomPage}`);
+                const finalData = await finalResponse.json();
+
+                // Pick a random movie from the results array of that page
+                const movies = finalData.results;
+                const randomIndex = Math.floor(Math.random() * movies.length);
+                const selectedMovie = movies[randomIndex];
+
+                // Render Data to Card
+                renderMovieCard(selectedMovie);
+
+            } catch (error) {
+                console.error("Fetch Error: ", error);
+                alert("Gagal terhubung ke database. Silakan coba lagi.");
+                resetToHome();
+            }
+        }
+
+        // Render data to DOM and show result view
+        function renderMovieCard(movie) {
+            // Titles & Text
+            document.getElementById('res-title').innerText = movie.title || movie.name;
+            document.getElementById('res-year').innerText = movie.release_date ? movie.release_date.split('-')[0] : 'TBA';
+            document.getElementById('res-rating').innerText = movie.vote_average ? parseFloat(movie.vote_average).toFixed(1) : 'NR';
+            
+            // Overview fallback
+            const overviewEl = document.getElementById('res-overview');
+            if (movie.overview) {
+                overviewEl.innerText = movie.overview;
+                overviewEl.classList.remove('italic', 'text-slate-500');
+            } else {
+                overviewEl.innerText = "Sinopsis tidak tersedia untuk film ini.";
+                overviewEl.classList.add('italic', 'text-slate-500');
+            }
+
+            // Poster
+            const posterEl = document.getElementById('res-poster');
+            if (movie.poster_path) {
+                posterEl.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+            } else {
+                posterEl.src = 'https://placehold.co/500x750/1e293b/cbd5e1?text=Poster+Tidak+Tersedia';
+            }
+
+            // Dynamic Genre Tags (Map ID to Name manually for Discover results)
+            const genreMap = {
+                28: 'Aksi', 12: 'Petualangan', 16: 'Animasi', 35: 'Komedi', 80: 'Kriminal', 99: 'Dokumenter', 18: 'Drama', 10751: 'Keluarga', 14: 'Fantasi', 36: 'Sejarah', 27: 'Horor', 10402: 'Musik', 9648: 'Misteri', 10749: 'Romantis', 878: 'Sci-Fi', 10770: 'Film TV', 53: 'Thriller', 10752: 'Perang', 37: 'Western'
+            };
+            
+            const genreContainer = document.getElementById('res-genres');
+            genreContainer.innerHTML = '';
+            
+            if (movie.genre_ids && movie.genre_ids.length > 0) {
+                movie.genre_ids.forEach(id => {
+                    if(genreMap[id]) {
+                        const span = document.createElement('span');
+                        span.className = 'text-xs font-semibold px-2.5 py-1 bg-white/5 border border-white/10 rounded-full text-slate-300';
+                        span.innerText = genreMap[id];
+                        genreContainer.appendChild(span);
+                    }
+                });
+            } else {
+                 const span = document.createElement('span');
+                 span.className = 'text-xs font-semibold px-2.5 py-1 bg-white/5 border border-white/10 rounded-full text-slate-400';
+                 span.innerText = 'Genre Tidak Diketahui';
+                 genreContainer.appendChild(span);
+            }
+
+            // Show Result
+            switchView('result');
+        }
     </script>
 </body>
 </html>
